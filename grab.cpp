@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "webcam.h"
+#include "camera.h"
 
 #define XRES 640
 #define YRES 480
@@ -11,8 +11,8 @@ using namespace std;
 int main(int argc, char** argv)
 {
 
-    Webcam webcam("/dev/video0", XRES, YRES);
-    auto frame = webcam.frame();
+    Webcam webcam("/dev/video1", XRES, YRES);
+    auto frame = webcam.frame(1000);
 
     ofstream image;
     image.open("frame.ppm");

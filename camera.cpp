@@ -35,7 +35,7 @@
 
 #include <linux/videodev2.h>
 
-#include "webcam.h"
+#include "camera.h"
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
