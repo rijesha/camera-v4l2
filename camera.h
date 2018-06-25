@@ -7,24 +7,26 @@
 
 using namespace std;
 
-struct buffer {
-      void   *data;
-      size_t  size;
+struct buffer
+{
+    void *data;
+    size_t size;
 };
 
-struct Image {
-      unsigned char   *data; // RGB888 <=> RGB24
-      size_t          width;
-      size_t          height;
-      size_t          size; // width * height * 3
+struct Image
+{
+    unsigned char *data; // RGB888 <=> RGB24
+    size_t width;
+    size_t height;
+    size_t size; // width * height * 3
 };
 
+class Camera
+{
 
-class Camera {
-
-public:
-    Camera(const std::string& device = "/dev/video0", 
-           int width = 640, 
+  public:
+    Camera(const std::string &device = "/dev/video0",
+           int width = 640,
            int height = 480,
            bool grayscale = false);
 
@@ -41,9 +43,9 @@ public:
      *
      * Throws a runtime_error if the timeout is reached.
      */
-    const Image& captureFrame(int timeout = 15);
+    const Image &captureFrame(int timeout = 15);
 
-private:
+  private:
     void init_mmap();
 
     void open_device();
@@ -65,15 +67,11 @@ private:
     bool grayscale;
 
     Image frame;
-    struct buffer          *buffers;
-    unsigned int     n_buffers;
+    struct buffer *buffers;
+    unsigned int n_buffers;
 
     size_t xres, yres;
     size_t stride;
 
     bool force_format = true;
 };
-
-
-
-

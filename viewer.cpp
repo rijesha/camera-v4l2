@@ -14,12 +14,12 @@
 using namespace std;
 using namespace cv;
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     std::clock_t start;
-    double duration1;  
-    double duration2;  
-    double duration3;    
+    double duration1;
+    double duration2;
+    double duration3;
 
     Camera camera("/dev/video1", XRES, YRES);
 
@@ -27,22 +27,20 @@ int main(int argc, char** argv)
     Image image;
 
     int wKey = -1;
-    while(wKey == -1 )
+    while (wKey == -1)
     {
         start = std::clock();
         image = camera.captureFrame();
-        duration1 = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+        duration1 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
         Mat img(YRES, XRES, CV_8UC3, image.data);
-        duration2 = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+        duration2 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
         imshow("Display window", img);
-        duration3 = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-        cout<<"capture time: "<< duration1;
-        cout<<" openCV Mat: "<< duration2;
-        cout<<" display time: "<< duration3 << endl;
-        wKey =  waitKey(1);
-        
+        duration3 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+        cout << "capture time: " << duration1;
+        cout << " openCV Mat: " << duration2;
+        cout << " display time: " << duration3 << endl;
+        wKey = waitKey(1);
     }
 
     return 0;
-
 }

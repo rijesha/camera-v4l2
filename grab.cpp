@@ -8,7 +8,7 @@
 
 using namespace std;
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 
     Camera camera("/dev/video1", XRES, YRES);
@@ -16,10 +16,10 @@ int main(int argc, char** argv)
 
     ofstream image;
     image.open("frame.ppm");
-    image << "P6\n" << XRES << " " << YRES << " 255\n";
-    image.write((char *) frame.data, frame.size);
+    image << "P6\n"
+          << XRES << " " << YRES << " 255\n";
+    image.write((char *)frame.data, frame.size);
     image.close();
 
     return 0;
-
 }
