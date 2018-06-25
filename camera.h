@@ -2,14 +2,17 @@
 **/
 
 #include <string>
+#include <iostream>
 #include <memory> // unique_ptr
+
+using namespace std;
 
 struct buffer {
       void   *data;
       size_t  size;
 };
 
-struct RGBImage {
+struct Image {
       unsigned char   *data; // RGB888 <=> RGB24
       size_t          width;
       size_t          height;
@@ -17,16 +20,17 @@ struct RGBImage {
 };
 
 
-class Webcam {
+class Camera {
 
 public:
-    Webcam(const std::string& device = "/dev/video0", 
+    Camera(const std::string& device = "/dev/video0", 
            int width = 640, 
-           int height = 480);
+           int height = 480,
+           bool grayscale = false);
 
-    ~Webcam();
+    ~Camera();
 
-    /** Captures and returns a frame from the webcam.
+    /** Captures and returns a frame from the Camera.
      *
      * The returned object contains a field 'data' with the image data in RGB888
      * format (ie, RGB24), as well as 'width', 'height' and 'size' (equal to
@@ -37,7 +41,7 @@ public:
      *
      * Throws a runtime_error if the timeout is reached.
      */
-    const RGBImage& frame(int timeout = 1);
+    const Image& captureFrame(int timeout = 10000);
 
 private:
     void init_mmap();
@@ -53,10 +57,14 @@ private:
 
     bool read_frame();
 
+    void set_fmt();
+    void set_crop();
+
     std::string device;
     int fd;
+    bool grayscale;
 
-    RGBImage rgb_frame;
+    Image frame;
     struct buffer          *buffers;
     unsigned int     n_buffers;
 

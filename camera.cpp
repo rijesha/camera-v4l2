@@ -92,34 +92,35 @@ static void v4lconvert_yuyv_to_rgb24(const unsigned char *src,
 /*******************************************************************/
 
 
-Webcam::Webcam(const string& device, int width, int height) : 
+Camera::Camera(const string& device, int width, int height, bool grayscale) : 
                         device(device),
                         xres(width),
-                        yres(height)
+                        yres(height),
+                        grayscale(grayscale)
 {
     open_device();
     init_device();
     // xres and yres are set to the actual resolution provided by the cam
 
     // frame stored as RGB888 (ie, RGB24)
-    rgb_frame.width = xres;
-    rgb_frame.height = yres;
-    rgb_frame.size = xres * yres * 3;
-    rgb_frame.data = (unsigned char *) malloc(rgb_frame.size * sizeof(char));
+    frame.width = xres;
+    frame.height = yres;
+    frame.size = xres * yres * 3;
+    frame.data = (unsigned char *) malloc(frame.size * sizeof(char));
 
     start_capturing();
 }
 
-Webcam::~Webcam()
+Camera::~Camera()
 {
       stop_capturing();
       uninit_device();
       close_device();
 
-      free(rgb_frame.data);
+      free(frame.data);
 }
 
-const RGBImage& Webcam::frame(int timeout)
+const Image& Camera::captureFrame(int timeout)
 {
     for (;;) {
         fd_set fds;
@@ -145,14 +146,14 @@ const RGBImage& Webcam::frame(int timeout)
             throw runtime_error(device + ": select timeout");
         }
         if (read_frame()) {
-            return rgb_frame;
+            return frame;
         }
         /* EAGAIN - continue select loop. */
     }
 
 }
 
-bool Webcam::read_frame()
+bool Camera::read_frame()
 {
 
     struct v4l2_buffer buf;
@@ -181,7 +182,7 @@ bool Webcam::read_frame()
     assert(buf.index < n_buffers);
 
     v4lconvert_yuyv_to_rgb24((unsigned char *) buffers[buf.index].data,
-                             rgb_frame.data,
+                             frame.data,
                              xres,
                              yres,
                              stride);
@@ -192,7 +193,7 @@ bool Webcam::read_frame()
     return true;
 }
 
-void Webcam::open_device(void)
+void Camera::open_device(void)
 {
       struct stat st;
 
@@ -212,13 +213,13 @@ void Webcam::open_device(void)
 }
 
 
-void Webcam::init_mmap(void)
+void Camera::init_mmap(void)
 {
       struct v4l2_requestbuffers req;
 
       CLEAR(req);
 
-      req.count = 4;
+      req.count = 2;
       req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       req.memory = V4L2_MEMORY_MMAP;
 
@@ -265,7 +266,7 @@ void Webcam::init_mmap(void)
       }
 }
 
-void Webcam::close_device(void)
+void Camera::close_device(void)
 {
       if (-1 == close(fd))
             throw runtime_error("close");
@@ -273,7 +274,7 @@ void Webcam::close_device(void)
       fd = -1;
 }
 
-void Webcam::init_device(void)
+void Camera::init_device(void)
 {
     struct v4l2_capability cap;
     struct v4l2_cropcap cropcap;
@@ -297,9 +298,15 @@ void Webcam::init_device(void)
         throw runtime_error(device + " does not support streaming i/o");
     }
 
-    /* Select video input, video standard and tune here. */
+    set_fmt();
 
+    init_mmap();
+}
 
+void Camera::set_crop(void)
+{
+    struct v4l2_cropcap cropcap;
+    struct v4l2_crop crop;
     CLEAR(cropcap);
 
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -321,8 +328,11 @@ void Webcam::init_device(void)
     } else {
         /* Errors ignored. */
     }
+}
 
-
+void Camera::set_fmt(void)
+{
+    struct v4l2_format fmt;
     CLEAR(fmt);
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -338,7 +348,7 @@ void Webcam::init_device(void)
         if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUYV)
             // note that libv4l2 (look for 'v4l-utils') provides helpers
             // to manage conversions
-            throw runtime_error("Webcam does not support YUYV format. Support for more format need to be added!");
+            throw runtime_error("Camera does not support YUYV format. Support for more format need to be added!");
 
         /* Note VIDIOC_S_FMT may change width and height. */
         xres = fmt.fmt.pix.width;
@@ -352,12 +362,10 @@ void Webcam::init_device(void)
         if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt))
             throw runtime_error("VIDIOC_G_FMT");
     }
-
-    init_mmap();
 }
 
 
-void Webcam::uninit_device(void)
+void Camera::uninit_device(void)
 {
     unsigned int i;
 
@@ -368,7 +376,7 @@ void Webcam::uninit_device(void)
     free(buffers);
 }
 
-void Webcam::start_capturing(void)
+void Camera::start_capturing(void)
 {
     unsigned int i;
     enum v4l2_buf_type type;
@@ -389,7 +397,7 @@ void Webcam::start_capturing(void)
         throw runtime_error("VIDIOC_STREAMON");
 }
 
-void Webcam::stop_capturing(void)
+void Camera::stop_capturing(void)
 {
     enum v4l2_buf_type type;
 

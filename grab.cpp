@@ -3,16 +3,16 @@
 
 #include "camera.h"
 
-#define XRES 640
-#define YRES 480
+#define XRES 1280
+#define YRES 1024
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
 
-    Webcam webcam("/dev/video1", XRES, YRES);
-    auto frame = webcam.frame(1000);
+    Camera camera("/dev/video1", XRES, YRES);
+    auto frame = camera.captureFrame();
 
     ofstream image;
     image.open("frame.ppm");
