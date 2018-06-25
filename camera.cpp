@@ -181,12 +181,15 @@ bool Camera::read_frame()
 
     assert(buf.index < n_buffers);
 
-    v4lconvert_yuyv_to_rgb24((unsigned char *) buffers[buf.index].data,
+    if (!grayscale) {
+        v4lconvert_yuyv_to_rgb24((unsigned char *) buffers[buf.index].data,
                              frame.data,
                              xres,
                              yres,
                              stride);
 
+    }
+    
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         throw runtime_error("VIDIOC_QBUF");
 

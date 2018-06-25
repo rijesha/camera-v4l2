@@ -41,7 +41,7 @@ public:
      *
      * Throws a runtime_error if the timeout is reached.
      */
-    const Image& captureFrame(int timeout = 10000);
+    const Image& captureFrame(int timeout = 15);
 
 private:
     void init_mmap();
