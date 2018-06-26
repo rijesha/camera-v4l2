@@ -162,7 +162,6 @@ bool Camera::read_frame()
 {
 
     struct v4l2_buffer buf;
-    unsigned int i;
 
     CLEAR(buf);
 
@@ -296,10 +295,6 @@ void Camera::close_device(void)
 void Camera::init_device(void)
 {
     struct v4l2_capability cap;
-    struct v4l2_cropcap cropcap;
-    struct v4l2_crop crop;
-    struct v4l2_format fmt;
-    unsigned int min;
 
     if (-1 == xioctl(fd, VIDIOC_QUERYCAP, &cap))
     {

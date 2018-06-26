@@ -64,7 +64,6 @@ class Camera
 
     std::string device;
     int fd;
-    bool grayscale;
 
     Image frame;
     struct buffer *buffers;
@@ -72,6 +71,7 @@ class Camera
 
     size_t xres, yres;
     size_t stride;
+    bool grayscale;
 
     bool force_format = true;
 };
