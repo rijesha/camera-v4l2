@@ -10,9 +10,12 @@
 
 #define XRES 1280
 #define YRES 1024
+bool grayscale = true;
 
 using namespace std;
 using namespace cv;
+
+Mat img;
 
 int main(int argc, char **argv)
 {
@@ -21,7 +24,7 @@ int main(int argc, char **argv)
     double duration2;
     double duration3;
 
-    Camera camera("/dev/video1", XRES, YRES);
+    Camera camera("/dev/video1", XRES, YRES, grayscale);
 
     //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     Image image;
@@ -32,7 +35,13 @@ int main(int argc, char **argv)
         start = std::clock();
         image = camera.captureFrame();
         duration1 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-        Mat img(YRES, XRES, CV_8UC3, image.data);
+        if (grayscale){
+            img = Mat(YRES, XRES, CV_8UC1, image.data); 
+        } else {
+            img = Mat(YRES, XRES, CV_8UC3, image.data);
+        }
+        
+        
         duration2 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
         imshow("Display window", img);
         duration3 = (std::clock() - start) / (double)CLOCKS_PER_SEC;

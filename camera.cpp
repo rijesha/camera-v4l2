@@ -195,6 +195,11 @@ bool Camera::read_frame()
                                  yres,
                                  stride);
     }
+    else {
+        for (int i = 0; i < xres*yres; i ++){
+            frame.data[i] = * ((unsigned char *) buffers[buf.index].data + i);
+        }
+    }
 
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         throw runtime_error("VIDIOC_QBUF");
@@ -365,16 +370,23 @@ void Camera::set_fmt(void)
     {
         fmt.fmt.pix.width = xres;
         fmt.fmt.pix.height = yres;
-        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+        if (grayscale) {
+            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
+        } else {
+            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+        }
+
         fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
         if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
             throw runtime_error("VIDIOC_S_FMT");
 
-        if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUYV)
-            // note that libv4l2 (look for 'v4l-utils') provides helpers
-            // to manage conversions
+        if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUYV && !grayscale){
             throw runtime_error("Camera does not support YUYV format. Support for more format need to be added!");
+        } else if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_GREY && grayscale){
+            throw runtime_error("Camera does not support GREY format. Support for more format need to be added!");
+        }
+            
 
         /* Note VIDIOC_S_FMT may change width and height. */
         xres = fmt.fmt.pix.width;

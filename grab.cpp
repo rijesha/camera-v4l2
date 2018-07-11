@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
 
-    Camera camera("/dev/video1", XRES, YRES);
+    Camera camera("/dev/video1", XRES, YRES, true);
     auto frame = camera.captureFrame();
 
     ofstream image;
