@@ -43,7 +43,8 @@ class Camera
      *
      * Throws a runtime_error if the timeout is reached.
      */
-    const Image &captureFrame(int timeout = 15);
+    const Image &captureFrame(bool throwaway = false, int timeout = 15);
+    void clearFrame(int timeout = 15);
 
   private:
     void init_mmap();
@@ -57,7 +58,7 @@ class Camera
     void start_capturing();
     void stop_capturing();
 
-    bool read_frame();
+    bool read_frame(bool throwaway = false);
 
     void set_fmt();
     void set_crop();

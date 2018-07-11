@@ -33,6 +33,7 @@ int main(int argc, char **argv)
     while (wKey == -1)
     {
         start = std::clock();
+        camera.clearFrame();
         image = camera.captureFrame();
         duration1 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
         if (grayscale){

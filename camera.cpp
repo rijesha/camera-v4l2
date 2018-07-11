@@ -122,7 +122,12 @@ Camera::~Camera()
     free(frame.data);
 }
 
-const Image &Camera::captureFrame(int timeout)
+void Camera::clearFrame(int timeout)
+{
+    captureFrame(true, timeout);
+}
+
+const Image &Camera::captureFrame(bool throwaway, int timeout)
 {
     for (;;)
     {
@@ -151,14 +156,14 @@ const Image &Camera::captureFrame(int timeout)
             throw runtime_error(device + ": select timeout");
         }
         if (read_frame())
-        {
+        {   
             return frame;
         }
         /* EAGAIN - continue select loop. */
     }
 }
 
-bool Camera::read_frame()
+bool Camera::read_frame(bool throwaway)
 {
 
     struct v4l2_buffer buf;
@@ -187,19 +192,22 @@ bool Camera::read_frame()
 
     assert(buf.index < n_buffers);
 
-    if (!grayscale)
-    {
-        v4lconvert_yuyv_to_rgb24((unsigned char *)buffers[buf.index].data,
-                                 frame.data,
-                                 xres,
-                                 yres,
-                                 stride);
-    }
-    else {
-        for (int i = 0; i < xres*yres; i ++){
-            frame.data[i] = * ((unsigned char *) buffers[buf.index].data + i);
+    if (!throwaway){
+        if (!grayscale)
+        {
+            v4lconvert_yuyv_to_rgb24((unsigned char *)buffers[buf.index].data,
+                                     frame.data,
+                                     xres,
+                                     yres,
+                                     stride);
+        }
+        else {
+            for (int i = 0; i < xres*yres; i ++){
+                frame.data[i] = * ((unsigned char *) buffers[buf.index].data + i);
+            }
         }
     }
+    
 
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         throw runtime_error("VIDIOC_QBUF");
@@ -235,7 +243,7 @@ void Camera::init_mmap(void)
 
     CLEAR(req);
 
-    req.count = 2;
+    req.count = 1;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
 
@@ -251,7 +259,7 @@ void Camera::init_mmap(void)
         }
     }
 
-    if (req.count < 2)
+    if (req.count < 1)
     {
         throw runtime_error(string("Insufficient buffer memory on ") + device);
     }
