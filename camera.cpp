@@ -95,7 +95,7 @@ static void v4lconvert_yuyv_to_rgb24(const unsigned char *src,
 }
 /*******************************************************************/
 
-Camera::Camera(const string &device, int width, int height, bool grayscale) : device(device),
+Camera::Camera(const string &device, int width, int height, bool grayscale, int gain, int exposure) : device(device),
                                                                               xres(width),
                                                                               yres(height),
                                                                               grayscale(grayscale)
@@ -109,6 +109,10 @@ Camera::Camera(const string &device, int width, int height, bool grayscale) : de
     frame.height = yres;
     frame.size = xres * yres * 3;
     frame.data = (unsigned char *)malloc(frame.size * sizeof(char));
+
+    updateGain(gain);
+    updateBrightness();
+    updateExposure(exposure);
 
     start_capturing();
 }
@@ -162,6 +166,39 @@ const Image &Camera::captureFrame(bool throwaway, int timeout)
         /* EAGAIN - continue select loop. */
     }
 }
+
+void Camera::updateGain(int gain)
+{
+    struct v4l2_control ctrl;
+    ctrl.id = V4L2_CID_GAIN;
+    ctrl.value = gain;
+
+    if (-1 == xioctl(fd, VIDIOC_S_CTRL, &ctrl))
+        throw runtime_error("VIDIOC_S_CTRL");
+}
+
+void Camera::updateBrightness(int brightness)
+{
+    struct v4l2_control ctrl;
+    ctrl.id = V4L2_CID_BRIGHTNESS;
+    ctrl.value = brightness;
+
+    if (-1 == xioctl(fd, VIDIOC_S_CTRL, &ctrl))
+        throw runtime_error("VIDIOC_S_CTRL");
+
+}
+
+void Camera::updateExposure(int exposure)
+{
+    struct v4l2_control ctrl;
+    ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+    ctrl.value = exposure;
+    
+    if (-1 == xioctl(fd, VIDIOC_S_CTRL, &ctrl))
+        throw runtime_error("VIDIOC_S_CTRL");
+
+}
+
 
 bool Camera::read_frame(bool throwaway)
 {

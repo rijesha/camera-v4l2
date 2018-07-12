@@ -28,7 +28,9 @@ class Camera
     Camera(const std::string &device = "/dev/video0",
            int width = 640,
            int height = 480,
-           bool grayscale = false);
+           bool grayscale = false,
+           int gain = 1,
+           int exposure = 1);
 
     ~Camera();
 
@@ -45,6 +47,9 @@ class Camera
      */
     const Image &captureFrame(bool throwaway = false, int timeout = 15);
     void clearFrame(int timeout = 15);
+    void updateGain(int gain = 1);
+    void updateBrightness(int brightness = 12);
+    void updateExposure(int exposure = 1);
 
   private:
     void init_mmap();

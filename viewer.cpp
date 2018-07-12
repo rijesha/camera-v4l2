@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     double duration2;
     double duration3;
 
-    Camera camera("/dev/video1", XRES, YRES, grayscale);
+    Camera camera("/dev/video1", XRES, YRES, grayscale, 12, 10);
 
     //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     Image image;
