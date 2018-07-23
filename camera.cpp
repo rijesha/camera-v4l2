@@ -122,8 +122,26 @@ Camera::~Camera()
     stop_capturing();
     uninit_device();
     close_device();
+    running = false;
+    if (auto_clear_th.joinable())
+        auto_clear_th.join();
 
     free(frame.data);
+}
+
+void Camera::autoClearAfterCapture(float time)
+{
+    chrono::milliseconds j((int) (time * 1000));
+    running = true;
+
+    auto_clear_th = thread([=]() {
+        while (running)
+        {
+            clearAfterCapture.lock();
+            this_thread::sleep_for(j);
+            clearFrame(); 
+        }
+    });
 }
 
 void Camera::clearFrame(int timeout)
@@ -162,6 +180,7 @@ const Image &Camera::captureFrame(bool throwaway, int timeout)
         if (read_frame())
         {   
             return frame;
+            clearAfterCapture.unlock();
         }
         /* EAGAIN - continue select loop. */
     }

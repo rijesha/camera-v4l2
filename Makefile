@@ -12,10 +12,10 @@ OPENCV = `pkg-config opencv --cflags --libs`
 all: $(PROG)
 
 $(PROG): $(GRAB_SRCS) $(COMMON_SRCS)
-	$(CC) $(CFLAGS) -o $(PROG) $(GRAB_SRCS) $(COMMON_SRCS)  -lv4l2
+	$(CC) $(CFLAGS) -o $(PROG) $(GRAB_SRCS) $(COMMON_SRCS) -pthread -lv4l2
 
 viewer: $(VIEWER_SRCS) $(COMMON_SRCS)
-	$(CC) $(CFLAGS) -o viewer $(VIEWER_SRCS) $(COMMON_SRCS) $(OPENCV)  -lv4l2
+	$(CC) $(CFLAGS) -o viewer $(VIEWER_SRCS) $(COMMON_SRCS) $(OPENCV) -pthread  -lv4l2
 
 clean:
 	$(RM) *.o

@@ -3,7 +3,10 @@
 
 #include <string>
 #include <iostream>
+#include <chrono>
+#include <thread>
 #include <memory> // unique_ptr
+#include <mutex>
 
 using namespace std;
 
@@ -46,6 +49,9 @@ class Camera
      * Throws a runtime_error if the timeout is reached.
      */
     const Image &captureFrame(bool throwaway = false, int timeout = 15);
+    
+    void  autoClearAfterCapture(float time = .030);
+    
     void clearFrame(int timeout = 15);
     void updateGain(int gain = 1);
     void updateBrightness(int brightness = 12);
@@ -80,4 +86,7 @@ class Camera
     bool grayscale;
 
     bool force_format = true;
+    mutex clearAfterCapture;
+    thread auto_clear_th;
+    bool running = false;
 };
