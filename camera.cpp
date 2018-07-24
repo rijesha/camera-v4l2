@@ -179,8 +179,8 @@ const Image &Camera::captureFrame(bool throwaway, int timeout)
         }
         if (read_frame())
         {   
-            return frame;
             clearAfterCapture.unlock();
+            return frame;
         }
         /* EAGAIN - continue select loop. */
     }
